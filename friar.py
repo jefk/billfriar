@@ -5,7 +5,7 @@ import re
 import heapq
 from collections import Counter
 
-class MaxHeap(list):
+class MaxHeap():
     ''' making heapq classy
     '''
 
@@ -13,9 +13,23 @@ class MaxHeap(list):
         ''' ls is a list of tuples in this format
             [ (val, label), (val, label), ... ]
         '''
-        list.__init__(self, ls)
         # multiply val by -1 to make this into a max heap, heapq is min heap
-        heapq.heapify([ (-1 * val, label) for val, label in self ])
+        self.heap = [ [-1 * val, label] for val, label in ls ]
+        heapq.heapify(self.heap)
+
+    def pop(self):
+        entry = heapq.heappop(self.heap)
+        entry[0] = -1 * entry[0]
+        return entry
+
+    def push(self, entry):
+        heapq.heappush(self.heap, [-1 * entry[0], entry[1] ])
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def __str__(self):
+        return self.heap.__str__()
 
 
 def parse(line):
@@ -24,6 +38,7 @@ def parse(line):
     '''
     line = line.strip()
     line = re.sub('\s+', ' ', line)
+
     debtor, rest = line.split(' owes ', 1)
     lender, rest = rest.split(' ', 1)
     amount = rest.split(' ')[0]
@@ -34,7 +49,7 @@ def parse(line):
     except:
         amount = 0
 
-    return debtor, lender, amount
+    return debtor.lower(), lender.lower(), amount
 
 def make_heaps(credit):
     debtor_values = [ (-1 * credit[person], person) for person in credit if credit[person] < 0 ]
@@ -44,15 +59,41 @@ def make_heaps(credit):
 def shuffle(credit):
     '''
     '''
+    transactions = []
     debtors, lenders = make_heaps(credit)
-    print(debtors)
-    print(lenders)
+    while not debtors.is_empty() and not lenders.is_empty():
+        debtor = debtors.pop()
+        lender = lenders.pop()
+        debtor[0] = round(debtor[0], 2)
+        lender[0] = round(lender[0], 2)
+        amount = min(debtor[0], lender[0])
+
+        if debtor[0] > lender[0]:
+            debtor[0] -= amount
+            debtors.push(debtor)
+        elif debtor[0] < lender[0]:
+            lender[0] -= amount
+            lenders.push(lender)
+        else:
+            # the debts are equal, so neither goes back on the heap
+            pass
+
+        transactions.append( {'payer':debtor[1], 'payee':lender[1], 'amount':amount} )
+
+    return transactions
 
 if __name__ == "__main__":
     credit = Counter()
     for line in sys.stdin:
-        debtor, lender, amount = parse(line)
+        try:
+            debtor, lender, amount = parse(line)
+            print('{debtor} owes {lender} ${amount}'.format( **locals() ))
+        except:
+            continue
+
         credit[lender] += amount
         credit[debtor] -= amount
 
-    transactions = shuffle(credit)
+    print()
+    for transaction in shuffle(credit):
+        print('{payer} pays {payee} ${amount}'.format(**transaction) )
