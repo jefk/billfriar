@@ -17,6 +17,14 @@ class MaxHeap(list):
         # multiply val by -1 to make this into a max heap, heapq is min heap
         heapq.heapify([ [-1 * val, label] for val, label in self ])
 
+    def pop(self):
+        entry = heapq.heappop(self)
+        entry[0] = -1 * entry[0]
+        return entry
+
+    def push(self, entry):
+        heapq.heappush(self, [-1 * entry[0], entry[1] ])
+
     def is_empty(self):
         return len(self) == 0
 
@@ -40,23 +48,33 @@ def parse(line):
     return debtor, lender, amount
 
 def make_heaps(credit):
-    debtor_values = [ (-1 * credit[person], person) for person in credit if credit[person] < 0 ]
-    lender_values = [ (credit[person], person) for person in credit if credit[person] > 0 ]
+    debtor_values = [ (credit[person], person) for person in credit if credit[person] < 0 ]
+    lender_values = [ (-1 * credit[person], person) for person in credit if credit[person] > 0 ]
     return MaxHeap(debtor_values), MaxHeap(lender_values)
 
 def shuffle(credit):
     '''
     '''
     debtors, lenders = make_heaps(credit)
-    print(debtors)
-    print(lenders)
+    print(debtors, lenders)
     while not debtors.is_empty() or not lenders.is_empty():
         debtor = debtors.pop()
         lender = lenders.pop()
+        amount = abs(debtor[0] - lender[0])
+        print('debtor,lender', debtor, lender)
+
         if debtor[0] > lender[0]:
-            debtor[0] -= lender[0]
+            debtor[0] -= amount
+            debtors.push(debtor)
+        elif lender[0] < debtor[0]:
+            lender[0] -= amount
+            lenders.push(lender)
         else:
-            lender[0] -= debtor[0]
+            # the debts are equal, so neither goes back on the heap
+            pass
+
+        print(debtors, lenders)
+        print('{lender[1]} pays {debtor[1]} ${amount}'.format( **locals() ))
 
 if __name__ == "__main__":
     credit = Counter()
