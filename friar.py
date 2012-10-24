@@ -38,6 +38,7 @@ def parse(line):
     '''
     line = line.strip()
     line = re.sub('\s+', ' ', line)
+
     debtor, rest = line.split(' owes ', 1)
     lender, rest = rest.split(' ', 1)
     amount = rest.split(' ')[0]
@@ -48,7 +49,7 @@ def parse(line):
     except:
         amount = 0
 
-    return debtor, lender, amount
+    return debtor.lower(), lender.lower(), amount
 
 def make_heaps(credit):
     debtor_values = [ (-1 * credit[person], person) for person in credit if credit[person] < 0 ]
@@ -58,10 +59,13 @@ def make_heaps(credit):
 def shuffle(credit):
     '''
     '''
+    transactions = []
     debtors, lenders = make_heaps(credit)
-    while not debtors.is_empty() or not lenders.is_empty():
+    while not debtors.is_empty() and not lenders.is_empty():
         debtor = debtors.pop()
         lender = lenders.pop()
+        debtor[0] = round(debtor[0], 2)
+        lender[0] = round(lender[0], 2)
         amount = min(debtor[0], lender[0])
 
         if debtor[0] > lender[0]:
@@ -74,13 +78,22 @@ def shuffle(credit):
             # the debts are equal, so neither goes back on the heap
             pass
 
-        print('{debtor[1]} pays {lender[1]} ${amount}'.format( **locals() ))
+        transactions.append( {'payer':debtor[1], 'payee':lender[1], 'amount':amount} )
+
+    return transactions
 
 if __name__ == "__main__":
     credit = Counter()
     for line in sys.stdin:
-        debtor, lender, amount = parse(line)
+        try:
+            debtor, lender, amount = parse(line)
+            print('{debtor} owes {lender} ${amount}'.format( **locals() ))
+        except:
+            continue
+
         credit[lender] += amount
         credit[debtor] -= amount
 
-    transactions = shuffle(credit)
+    print()
+    for transaction in shuffle(credit):
+        print('{payer} pays {payee} ${amount}'.format(**transaction) )
