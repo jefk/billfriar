@@ -15,7 +15,10 @@ class MaxHeap(list):
         '''
         list.__init__(self, ls)
         # multiply val by -1 to make this into a max heap, heapq is min heap
-        heapq.heapify([ (-1 * val, label) for val, label in self ])
+        heapq.heapify([ [-1 * val, label] for val, label in self ])
+
+    def is_empty(self):
+        return len(self) == 0
 
 
 def parse(line):
@@ -47,6 +50,13 @@ def shuffle(credit):
     debtors, lenders = make_heaps(credit)
     print(debtors)
     print(lenders)
+    while not debtors.is_empty() or not lenders.is_empty():
+        debtor = debtors.pop()
+        lender = lenders.pop()
+        if debtor[0] > lender[0]:
+            debtor[0] -= lender[0]
+        else:
+            lender[0] -= debtor[0]
 
 if __name__ == "__main__":
     credit = Counter()
