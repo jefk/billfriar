@@ -1,11 +1,22 @@
+#! /usr/bin/python3.2
 
 import sys
 import re
 import heapq
 from collections import Counter
 
-def max_heapify(ls):
-    return heapq.heapify( [(-1 * val, label) for val, label in ls] )
+class MaxHeap(list):
+    ''' making heapq classy
+    '''
+
+    def __init__(self, ls = []):
+        ''' ls is a list of tuples in this format
+            [ (val, label), (val, label), ... ]
+        '''
+        list.__init__(self, ls)
+        # multiply val by -1 to make this into a max heap, heapq is min heap
+        heapq.heapify([ (-1 * val, label) for val, label in self ])
+
 
 def parse(line):
     ''' lines are expect to be in this form
@@ -28,11 +39,7 @@ def parse(line):
 def make_heaps(credit):
     debtor_values = [ (-1 * credit[person], person) for person in credit if credit[person] < 0 ]
     lender_values = [ (credit[person], person) for person in credit if credit[person] > 0 ]
-    print(debtor_values)
-    print(lender_values)
-    max_heapify(debtor_values)
-    max_heapify(lender_values)
-    return debtor_values, lender_values
+    return MaxHeap(debtor_values), MaxHeap(lender_values)
 
 def shuffle(credit):
     '''
