@@ -1,3 +1,5 @@
 billfriar
 =========
-billfriar is a replacement for billmonk. It is not done yet.
+billfriar is a replacement for billmonk.
+
+`cat data | python3.2 friar.py`
