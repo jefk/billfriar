@@ -95,7 +95,7 @@ if __name__ == "__main__":
         except:
             continue
 
-        print( '{debtor} owes {lender} ${amount}'.format( **locals() ), memo)
+        print( '{debtor} owes {lender} ${amount} {memo}'.format( **locals() ) )
         credit[lender] += amount
         credit[debtor] -= amount
 
