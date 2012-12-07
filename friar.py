@@ -41,15 +41,20 @@ def parse(line):
 
     debtor, rest = line.split(' owes ', 1)
     lender, rest = rest.split(' ', 1)
-    amount = rest.split(' ')[0]
-    amount = amount.replace('$', '')
 
+    if ' ' in rest.strip():
+        amount, memo = rest.split(' ', 1)
+    else:
+        amount = rest
+        memo = ''
+
+    amount = amount.replace('$', '')
     try:
         amount = float(amount)
     except:
         amount = 0
 
-    return debtor.lower(), lender.lower(), amount
+    return debtor.lower(), lender.lower(), amount, memo
 
 def make_heaps(credit):
     debtor_values = [ (-1 * credit[person], person) for person in credit if credit[person] < 0 ]
@@ -86,11 +91,11 @@ if __name__ == "__main__":
     credit = Counter()
     for line in sys.stdin:
         try:
-            debtor, lender, amount = parse(line)
-            print('{debtor} owes {lender} ${amount}'.format( **locals() ))
+            debtor, lender, amount, memo = parse(line)
         except:
             continue
 
+        print( '{debtor} owes {lender} ${amount}'.format( **locals() ), memo)
         credit[lender] += amount
         credit[debtor] -= amount
 
