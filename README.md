@@ -7,6 +7,7 @@ It's a barebones interface--right now you can pipe a list of debts into the scri
 
 The parser ignores things it can't parse, so the input can be pretty messy. Just make sure there are some lines that have
 `[player 1] owes [player 2] [amount]`
+billfriar can handle an arbitrary number of debtors and lenders.
 
 ## name
 billfriar is named (uncreatively) after billmonk, a potentially awesome website that rarely is operational.
