@@ -49,10 +49,7 @@ def parse(line):
         memo = ''
 
     amount = amount.replace('$', '')
-    try:
-        amount = float(amount)
-    except:
-        amount = 0
+    amount = float(amount)
 
     return debtor.lower(), lender.lower(), amount, memo
 
